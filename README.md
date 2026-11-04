@@ -6,8 +6,28 @@ ROS 2 jazzy workspace, push-IK web/sim, pad sender, sim-to-sim.
 |---|---|
 | Layer | **L3**: Apps (processes you start) |
 | May import | [k1-common](https://github.com/thdhyan/k1-common), [k1-runtime](https://github.com/thdhyan/k1-runtime), [k1-teleop](https://github.com/thdhyan/k1-teleop), [k1-perception](https://github.com/thdhyan/k1-perception) |
-| Files / LOC | 56 files · 5,520 lines (py, sh, cpp) |
+| Files / LOC | 55 files · 5,520 lines (py, sh, cpp) |
 | Part of | [k1-workspace](https://github.com/thdhyan/k1-workspace) (architecture and layering rules live there) |
+
+## Where it sits
+
+```mermaid
+flowchart TB
+  k1_common[k1-common]
+  k1_runtime[k1-runtime]
+  k1_teleop[k1-teleop]
+  k1_perception[k1-perception]
+  k1_deploy_laptop((k1-deploy-laptop))
+  style k1_deploy_laptop fill:#e8833a,color:#000
+  k1_deploy_laptop --> k1_common
+  k1_deploy_laptop --> k1_runtime
+  k1_deploy_laptop --> k1_teleop
+  k1_deploy_laptop --> k1_perception
+```
+
+Used by: nothing (top layer).
+
+![k1-workspace layers](https://raw.githubusercontent.com/thdhyan/k1-workspace/main/docs/img/architecture.png)
 
 ## Install
 
@@ -20,6 +40,7 @@ uv sync
 ## Layout
 
 ```
+README.md
 deploy/  (8 files)
   README.md
   gamepad_sim.py
