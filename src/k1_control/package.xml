@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>k1_control</name>
+  <version>0.1.0</version>
+  <description>Bridge between ROS2 JointCommand msgs and control backends (SDK for real robot, passthrough for sim)</description>
+  <maintainer email="th.dhyan.us@gmail.com">Booster K1</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>rclcpp</build_depend>
+  <build_depend>rclcpp_components</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>k1_interfaces</build_depend>
+
+  <exec_depend>python3</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

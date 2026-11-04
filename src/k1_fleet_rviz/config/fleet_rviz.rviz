@@ -1,0 +1,338 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+    Property Tree Widget:
+      Expand Groups: true
+      Name: Displays
+    Value: true
+  - Class: rviz_common/Views
+    Name: Views
+    Value: true
+
+Visualization Manager:
+  Displays:
+    - Class: rviz_common/Group
+      Name: A1 (k1_0)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_0/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_0/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_0/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_common/Group
+      Name: A2 (k1_1)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_1/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_1/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_1/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_common/Group
+      Name: A3 (k1_2)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_2/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_2/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_2/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_common/Group
+      Name: B1 (k1_3)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_3/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_3/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_3/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_common/Group
+      Name: B2 (k1_4)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_4/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_4/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_4/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_common/Group
+      Name: B3 (k1_5)
+      Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Left RGB
+          Topic:
+            Value: /k1_5/boostercamera/head/raw/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Right RGB
+          Topic:
+            Value: /k1_5/boostercamera/head/raw/right/rgb
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+        - Class: rviz_default_plugins/Image
+          Enabled: true
+          Name: Depth
+          Topic:
+            Value: /k1_5/boostercamera/head/depth
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+          Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Frame Timeout: 15
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: A1 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_0/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: A2 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_1/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: A3 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_2/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: B1 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_3/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: B2 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_4/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: B3 Robot
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+      Description Source: Topic
+      Robot Description Topic:
+        Value: /k1_5/robot_description
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Value: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: k1_0/pelvis
+    Frame Rate: 30
+  Global Clock:
+    Use sim time: false
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 3
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Field of View: 0.7854
+      Focal Frame: k1_0/pelvis
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current
+      Near Clip Distance: 0.01
+      Pitch: 0.5
+      Target Frame: k1_0/pelvis
+      Yaw: 0.785
+
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1080
+  Width: 1920
+  X: 0
+  Y: 0

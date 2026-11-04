@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>k1_bringup</name>
+  <version>0.1.0</version>
+  <description>Top-level launch entry points for K1 (gazebo, isaac, real, fleet)</description>
+  <maintainer email="th.dhyan.us@gmail.com">thakk100</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>k1_description</depend>
+  <depend>k1_control</depend>
+  <depend>k1_locomotion</depend>
+  <depend>k1_sim_gazebo</depend>
+  <depend>k1_sim_isaac</depend>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

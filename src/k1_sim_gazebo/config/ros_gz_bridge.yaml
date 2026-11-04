@@ -1,0 +1,19 @@
+# ros_gz_bridge config for K1 Gazebo sim
+# Robot namespace set at launch time via robot_ns arg
+- ros_topic_name: "/{robot_ns}/joint_states"
+  gz_topic_name: "/world/k1_flat/model/{robot_ns}/joint_state"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/{robot_ns}/odom"
+  gz_topic_name: "/world/k1_flat/model/{robot_ns}/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/{robot_ns}/cmd_vel"
+  gz_topic_name: "/world/k1_flat/model/{robot_ns}/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ

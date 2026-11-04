@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.ruff_cache/
+.pytest_cache/
+build/
+install/
+log/
+outputs/
+wandb/
+*.pt
+*.onnx
+*.npz
+*.mp4
+.env

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>K1 PushIK</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:13px/1.4 system-ui,sans-serif;background:#14181d;color:#dde3ea;display:grid;grid-template-columns:330px 1fr;height:100vh}
+#side{overflow-y:auto;padding:10px;border-right:1px solid #2c333b}#views{display:grid;grid-template-rows:1fr auto;min-width:0;min-height:0}
+#panes{display:grid;grid-template-columns:1fr 1fr;min-height:0}#panes>div{position:relative;min-width:0;min-height:0}canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+h3{margin:12px 0 4px;font-size:12px;letter-spacing:.04em;color:#8fa0b2;text-transform:uppercase}
+.row{display:grid;grid-template-columns:62px repeat(3,1fr) 56px;gap:3px;align-items:center;margin:2px 0}.row b{font-weight:500}
+input,select{width:100%;background:#1e242b;border:1px solid #38414b;color:inherit;padding:2px 4px;border-radius:3px}input[type=range]{padding:0}
+button{background:#2a3440;border:1px solid #445161;color:inherit;padding:3px 6px;border-radius:3px;cursor:pointer}button:hover{background:#354252}button:disabled{opacity:.45;cursor:default}
+.big{width:100%;padding:8px;margin-top:4px;font-weight:600}#exec{background:#7a4a10;border-color:#b97a25}#stop{background:#a11d1d;border-color:#e04545;font-size:16px;padding:12px;position:sticky;bottom:0;z-index:2}input[type=number]{-moz-appearance:textfield}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ok{color:#6fdc8c}.bad{color:#ff8a7a}.warn{color:#f3c057}.dim{color:#7f8d9c}small{display:block}
+#mode{padding:5px 8px;border-radius:3px;font-weight:600;text-align:center}#bar{display:flex;gap:8px;align-items:center;padding:6px 10px;border-top:1px solid #2c333b}#bar input{flex:1}
+.tag{position:absolute;left:8px;top:6px;color:#8fa0b2;font-size:11px;pointer-events:none;z-index:1}
+</style>
+<script type="importmap">{"imports":{"three":"/vendor/three.module.js"}}</script></head><body>
+<div id="side">
+  <div id="mode"></div>
+  <button class="big" id="reset" title="Clear the preview and the run state (not while robots run). Headings and the form stay.">Reset</button>
+  <h3>Caps</h3><div id="caps"></div><div id="ping" class="dim"></div>
+  <div class="row" style="grid-template-columns:62px 1fr 1fr 56px"><b>heading</b><select id="hwho"><option value="a">robot a</option><option value="b">robot b</option><option value="box">box</option></select><input id="hdeg" type="text" inputmode="decimal" value="0" title="true heading of it right now, deg from PhaseSpace +x (counter-clockwise)"><button id="hset">Set</button></div>
+  <div class="row" style="grid-template-columns:62px 1fr"><span></span><input id="hslide" type="range" min="-180" max="180" step="1" value="0" title="heading, deg"></div>
+  <small class="dim">Hold it still: 1 s average. Its yaw is offset to this value and keeps following the cap.</small>
+  <div id="fakebox" style="display:none"><h3>Fake caps</h3><small class="dim">Fake mode: "Cap" buttons below copy the form pose to the cap first.</small></div>
+  <h3>1. Goal: cap on the floor at goal, turned as on the box</h3>
+  <div id="r_goal"></div>
+  <h3>2. Box: cap on box, centred</h3>
+  <div id="r_box"></div>
+  <div class="row"><b>size m</b><input id="depth" title="depth" type="number" step="0.01" value="0.381"><input id="width" title="width" type="number" step="0.01" value="0.432"><input id="height" title="height" type="number" step="0.01" value="0.495"><span class="dim">d w h</span></div>
+  <div class="row"><b>kg, mu</b><input id="mass" type="number" step="0.1" value="2"><input id="friction" type="number" step="0.05" value="0.45"><span></span><span></span></div>
+  <h3>3. Robots start (trunk)</h3>
+  <div id="r_a"></div><div id="r_b"></div>
+  <small class="dim">x y (m), yaw (deg). Drag a thing in the top view, wheel over it to turn it. Robots' end poses are not inputs: the policy has only a box goal, so they come from the preview.</small>
+  <h3>4. Preview</h3>
+  <div class="row" style="grid-template-columns:62px 1fr"><b>policy</b><select id="policy"></select></div>
+  <div id="warn" class="warn"></div>
+  <div class="row" style="grid-template-columns:62px 1fr"><b>limit s</b><input id="limit" type="number" step="30" min="10" max="600" value="180" title="Sim time the preview may push before it counts as a timeout. Longer costs wall time only."></div>
+  <button class="big" id="prev">Preview in sim</button>
+  <div id="outcome"></div>
+  <h3>5. Execute</h3>
+  <small class="dim">Robots standing in stock Walking. The script exits after each stop, so start it again before each run.</small>
+  <button class="big" id="scripts">Start robot scripts</button>
+  <div id="robots"></div><div id="padinfo" class="dim"></div>
+  <div id="block" class="bad"></div>
+  <label><input type="checkbox" id="arm" style="width:auto"> spotters ready</label>
+  <button class="big" id="exec" disabled>Execute on robots</button>
+  <h3>Walk to box (no push, no policy)</h3>
+  <small class="dim">Robot a walks to the dotted white pose in the top view and faces the box, arms home, then stops (stock Walking). Live caps, not the form. Same stops as Execute; times out after 60 s.</small>
+  <div class="row" style="grid-template-columns:62px 1fr 1fr"><b>stop at</b><input id="standoff" type="number" step="0.05" min="0.35" max="1.5" value="0.6" title="trunk distance from the box centre, m"><select id="apprside"><option value="push">push side (away from goal)</option><option value="near">nearest side</option></select></div>
+  <button class="big" id="appr">Walk to box</button>
+  <div id="run"></div>
+  <small class="warn">A fall stops both robots only if its status packet arrives: stay ready on STOP.</small>
+  <button class="big" id="stop">STOP (Esc)</button>
+</div>
+<div id="views"><div id="panes">
+  <div id="top"><span class="tag">Top view, PhaseSpace frame. Solid = live caps, outline = form, green = goal.</span><canvas id="c2"></canvas>
+    <div id="livebox" style="position:absolute;right:8px;top:6px;z-index:1;background:#1e242bdd;border:1px solid #38414b;border-radius:4px;padding:6px 8px;font:12px/1.5 ui-monospace,monospace;white-space:pre"></div>
+    <button id="fit" style="position:absolute;left:8px;bottom:8px;z-index:1" title="Zoom the top view to the origin, live caps, box and goal">Fit view</button>
+    <label style="position:absolute;left:84px;bottom:12px;z-index:1;background:#14181dcc;padding:2px 6px" title="Copy the live robot and box cap poses into the form every 0.1 s, so the sim scene follows PhaseSpace. The goal is not touched."><input type="checkbox" id="track"> Track live</label></div>
+  <div id="d3"><span class="tag" id="tag3">3D</span></div>
+</div><div id="bar"><button id="play">Play</button><input id="seek" type="range" min="0" max="0" value="0"><span id="time">-</span>
+  <label><input type="radio" name="view" value="form" checked style="width:auto"> form</label><label><input type="radio" name="view" value="live" style="width:auto"> live</label><label><input type="radio" name="view" value="preview" style="width:auto"> preview</label>
+</div></div>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from '/vendor/OrbitControls.js';
+const $=id=>document.getElementById(id);
+const post=async(u,b={})=>{const r=await fetch(u,{method:'POST',body:JSON.stringify(b)});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j};
+const COLORS={a:'#4aa3ff',b:'#ff9f43',box:'#c98a4b',goal:'#3fd16b'};
+const THINGS={goal:'goal',box:'box',a:'robot a',b:'robot b'};
+const SRC={goal:'box',box:'box',a:'a',b:'b'};  // goal is latched from the box's cap
+const f={};
+for(const k in THINGS){const h=$('r_'+k);h.className='row';h.innerHTML=`<b style="color:${COLORS[k]}">${THINGS[k]}</b>`+['x','y','yaw'].map(n=>`<input id="${k}_${n}" type="number" step="${n=='yaw'?5:.05}" value="0">`).join('')+`<button data-k="${k}">Cap</button>`;f[k]=['x','y','yaw'].map(n=>$(`${k}_${n}`));}
+const defaults={goal:[1,0.2,10],box:[0,0,0],a:[-0.75,0.4,0],b:[-0.75,-0.4,0]};
+const saved=JSON.parse(localStorage.getItem('pik')||'{}');
+const setF=(k,v)=>{f[k].forEach((e,i)=>e.value=(+v[i]).toFixed(i==2?1:3))};
+for(const k in THINGS)setF(k,saved[k]||defaults[k]);
+for(const k of ['depth','width','height','mass','friction'])if(saved[k]!=null)$(k).value=saved[k];
+const getF=k=>f[k].map(e=>+e.value);const rad=p=>[p[0],p[1],p[2]*Math.PI/180];
+// one-robot mode: robot b is the ghost partner the policy is shown, fixed beside robot a
+const ghostOf=a=>{const[dx,dy]=st.ghost,c=Math.cos(a[2]),s=Math.sin(a[2]);return[a[0]+c*dx-s*dy,a[1]+s*dx+c*dy,a[2]]};
+function scene(){const a=rad(getF('a'));return{a,b:st&&st.solo?ghostOf(a):rad(getF('b')),box:rad(getF('box')),goal:rad(getF('goal')),half:[+$('depth').value/2,+$('width').value/2,+$('height').value/2],mass:+$('mass').value,friction:+$('friction').value,policy:$('policy').value}}
+let formSent='';function sendForm(){const j=JSON.stringify(scene());if(j!=formSent&&st){formSent=j;post('/api/form',scene()).catch(()=>{})}}
+function save(){const o={};for(const k in THINGS)o[k]=getF(k);for(const k of ['depth','width','height','mass','friction'])o[k]=+$(k).value;localStorage.setItem('pik',JSON.stringify(o))}
+let st=null,res=null,frameIdx=0,playing=false,view='form';
+document.querySelectorAll('input[name=view]').forEach(r=>r.onchange=()=>{view=r.value;refreshForm()});
+function setView(v){view=v;document.querySelector(`input[name=view][value=${v}]`).checked=true;refreshForm()}
+
+// ------------------ 3D
+const R=new THREE.WebGLRenderer({antialias:true});$('d3').appendChild(R.domElement);
+const S3=new THREE.Scene();S3.background=new THREE.Color(0x14181d);
+const cam=new THREE.PerspectiveCamera(45,1,.05,80);cam.up.set(0,0,1);cam.position.set(-3.5,-4,3);
+const orbit=new OrbitControls(cam,R.domElement);
+S3.add(new THREE.HemisphereLight(0xffffff,0x334455,2.0));const dl=new THREE.DirectionalLight(0xffffff,1.5);dl.position.set(3,-4,6);S3.add(dl);
+const grid=new THREE.GridHelper(12,24,0x445566,0x2a333c);grid.rotation.x=Math.PI/2;S3.add(grid);S3.add(new THREE.AxesHelper(1));
+const originDot=new THREE.Mesh(new THREE.SphereGeometry(.05,16,12),new THREE.MeshBasicMaterial({color:0xffffff}));S3.add(originDot);  // PhaseSpace origin
+const boxMesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0xc98a4b}));S3.add(boxMesh);
+const goalMesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0x3fd16b,transparent:true,opacity:.35}));S3.add(goalMesh);
+let bodies=[];
+async function loadModel(){
+  const m=await (await fetch('/api/model')).json();const geo={};
+  await Promise.all(Object.entries(m.meshes).map(async([id,[nv,nf]])=>{const buf=await (await fetch('/api/mesh/'+id)).arrayBuffer();
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(buf,0,nv*3),3));g.setIndex(new THREE.BufferAttribute(new Uint32Array(buf,nv*12,nf*3),1));g.computeVertexNormals();geo[id]=g}));
+  bodies=[...Array(m.bodies)].map(()=>{const o=new THREE.Group();o.matrixAutoUpdate=true;S3.add(o);return o});
+  for(const g of m.geoms){const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(g.rgba[0],g.rgba[1],g.rgba[2])});const me=new THREE.Mesh(geo[g.mesh],mat);me.position.set(...g.pos);me.quaternion.set(g.quat[1],g.quat[2],g.quat[3],g.quat[0]);bodies[g.body].add(me)}
+}
+function applyFrame(b){if(!b||!bodies.length)return;bodies.forEach((o,i)=>{const k=i*7;o.position.set(b[k],b[k+1],b[k+2]);o.quaternion.set(b[k+4],b[k+5],b[k+6],b[k+3])})}
+function setBox(mesh,p,half,zq){mesh.scale.set(half[0]*2,half[1]*2,half[2]*2);mesh.position.set(p[0],p[1],half[2]);mesh.quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),p[2])}
+function resize3(){const e=$('d3');R.setSize(e.clientWidth,e.clientHeight,false);cam.aspect=e.clientWidth/Math.max(1,e.clientHeight);cam.updateProjectionMatrix()}
+addEventListener('resize',()=>{resize3();draw2()});resize3();
+
+// ------------------ top view
+const C=$('c2'),X=C.getContext('2d');let view2={s:110,cx:0.3,cy:0};
+const w2s=(x,y)=>[C.width/2+(x-view2.cx)*view2.s,C.height/2-(y-view2.cy)*view2.s];
+const s2w=(u,v)=>[(u-C.width/2)/view2.s+view2.cx,-(v-C.height/2)/view2.s+view2.cy];
+function rect(p,half,col,fill,dash){const c=Math.cos(p[2]),s=Math.sin(p[2]);X.beginPath();[[1,1],[1,-1],[-1,-1],[-1,1]].forEach(([i,j],n)=>{const[u,v]=w2s(p[0]+c*i*half[0]-s*j*half[1],p[1]+s*i*half[0]+c*j*half[1]);n?X.lineTo(u,v):X.moveTo(u,v)});X.closePath();X.strokeStyle=col;X.setLineDash(dash?[5,4]:[]);X.lineWidth=2;X.stroke();if(fill){X.fillStyle=fill;X.fill()}X.setLineDash([])}
+function robot(p,col,solid){const[u,v]=w2s(p[0],p[1]);X.beginPath();X.arc(u,v,.17*view2.s,0,7);X.strokeStyle=col;X.lineWidth=2;X.setLineDash(solid?[]:[5,4]);X.stroke();X.setLineDash([]);if(solid){X.fillStyle=col+'55';X.fill()}X.beginPath();X.moveTo(u,v);X.lineTo(u+Math.cos(p[2])*.3*view2.s,v-Math.sin(p[2])*.3*view2.s);X.stroke()}
+function path(pts,col,w=1.5){X.beginPath();pts.forEach((p,i)=>{const[u,v]=w2s(p[0],p[1]);i?X.lineTo(u,v):X.moveTo(u,v)});X.strokeStyle=col;X.lineWidth=w;X.stroke()}
+function draw2(){const r=C.getBoundingClientRect();if(C.width!=r.width||C.height!=r.height){C.width=r.width;C.height=r.height}
+  X.fillStyle='#14181d';X.fillRect(0,0,C.width,C.height);X.strokeStyle='#27303a';X.lineWidth=1;const lo=s2w(0,C.height),hi=s2w(C.width,0);
+  for(let x=Math.ceil(lo[0]*2)/2;x<hi[0];x+=.5){const[u]=w2s(x,0);X.beginPath();X.moveTo(u,0);X.lineTo(u,C.height);X.stroke()}
+  for(let y=Math.ceil(lo[1]*2)/2;y<hi[1];y+=.5){const[,v]=w2s(0,y);X.beginPath();X.moveTo(0,v);X.lineTo(C.width,v);X.stroke()}
+  const[ou,ov]=w2s(0,0);X.lineWidth=2.5;X.fillStyle='#ffffff';X.beginPath();X.arc(ou,ov,4,0,7);X.fill();X.font='12px system-ui';X.fillText('origin (0, 0)',ou+6,ov+16);
+  X.fillStyle='#e05555';X.fillText('+x',ou+view2.s+4,ov+4);X.fillStyle='#55c060';X.fillText('+y',ou-6,ov-view2.s-6);
+  X.strokeStyle='#e05555';X.beginPath();X.moveTo(ou,ov);X.lineTo(ou+view2.s,ov);X.stroke();X.strokeStyle='#55c060';X.beginPath();X.moveTo(ou,ov);X.lineTo(ou,ov-view2.s);X.stroke();X.lineWidth=1;
+  X.strokeStyle='#e05555';X.beginPath();X.moveTo(ou,ov);X.lineTo(ou+.5*view2.s,ov);X.stroke();X.strokeStyle='#55c060';X.beginPath();X.moveTo(ou,ov);X.lineTo(ou,ov-.5*view2.s);X.stroke();
+  const sc=scene();
+  rect(sc.goal,sc.half,COLORS.goal,COLORS.goal+'33');rect(sc.box,sc.half,COLORS.box,null,true);robot(sc.a,COLORS.a,false);robot(sc.b,COLORS.b,false);
+  if(res&&res.trace){const t=res.trace;path(t.map(r=>[r[1],r[2]]),COLORS.a+'99');path(t.map(r=>[r[4],r[5]]),COLORS.b+'99');path(t.map(r=>[r[7],r[8]]),COLORS.box+'cc',2.5);
+    if(view=='preview'){const r=t[Math.min(frameIdx,t.length-1)];rect([r[7],r[8],r[9]],sc.half,COLORS.box,COLORS.box+'55');robot([r[1],r[2],r[3]],COLORS.a,true);robot([r[4],r[5],r[6]],COLORS.b,true)}}
+  if(st){const l=st.live;if(l.box)rect(l.box.pose,sc.half,'#ffffff',COLORS.box+'88');if(l.a)robot(l.a.pose,COLORS.a,true);if(l.b)robot(l.b.pose,COLORS.b,true);
+    {const tg=apprTarget();if(tg){robot(tg,'#ffffff',false);const[u,v]=w2s(tg[0],tg[1]);X.fillStyle='#ffffff';X.font='11px system-ui';X.fillText('walk target',u+8,v-10)}}
+    const t=st.run_trace;if(t&&t.length){path(t.map(r=>[r[0],r[1]]),COLORS.a,2);path(t.map(r=>[r[3],r[4]]),COLORS.b,2);path(t.map(r=>[r[6],r[7]]),'#ffffff',3)}}
+}
+let drag=null;const near=(wx,wy)=>{let best=null,bd=.45;for(const k in THINGS){if(k=='b'&&st&&st.solo)continue;const p=getF(k),d=Math.hypot(p[0]-wx,p[1]-wy);if(d<bd){bd=d;best=k}}return best};
+const pos=e=>{const r=C.getBoundingClientRect();return s2w(e.clientX-r.left,e.clientY-r.top)};
+C.onpointerdown=e=>{const[x,y]=pos(e);drag=near(x,y);if(drag)C.setPointerCapture(e.pointerId)};
+C.onpointermove=e=>{if(!drag)return;const[x,y]=pos(e);setF(drag,[x,y,getF(drag)[2]]);changed()};
+C.onpointerup=()=>{drag=null};
+C.onwheel=e=>{e.preventDefault();const[x,y]=pos(e),k=near(x,y);if(k){const p=getF(k);p[2]+=e.deltaY>0?-5:5;setF(k,p);changed()}else{view2.s=Math.max(20,Math.min(300,view2.s*(e.deltaY>0?.9:1.1)));draw2()}};
+
+// ------------------ form + scene
+let kinTimer=null;
+function refreshForm(){draw2();const sc=scene();setBox(goalMesh,sc.goal,[sc.half[0],sc.half[1],.005]);
+  if(view=='form'){setBox(boxMesh,sc.box,sc.half);clearTimeout(kinTimer);kinTimer=setTimeout(async()=>{if(view=='form')applyFrame((await post('/api/kinematics',{a:sc.a,b:sc.b})).frame)},60)}
+  $('tag3').textContent={form:'3D: scene from the form, robots at home pose',live:'3D: live cap poses, robots at home pose',preview:'3D: preview sim'}[view]}
+function changed(){save();if(view!='form')setView('form');refreshForm();$('warn').textContent=localWarn().join(' | ')}
+function localWarn(){if(!st)return[];const sc=scene(),out=[],L=st.limits,full=sc.half.map(v=>2*v),hr=st.policies[sc.policy]||[0,9];
+  [['depth',full[0],L.depth],['width',full[1],L.width],['height',full[2],hr],['mass',sc.mass,L.mass],['friction',sc.friction,L.friction]].forEach(([n,v,[a,b]])=>{if(v<a||v>b)out.push(`${n} ${v.toFixed(2)} outside trained ${a}-${b}`)});
+  const d=Math.hypot(sc.box[0]-sc.goal[0],sc.box[1]-sc.goal[1]);if(d>L.goal_dist)out.push(`goal ${d.toFixed(2)} m, trained up to ${L.goal_dist}`);return out}
+document.querySelectorAll('#side input[type=number],#policy').forEach(e=>e.addEventListener('input',changed));
+document.querySelectorAll('button[data-k]').forEach(b=>b.onclick=async()=>{const k=b.dataset.k;b.disabled=true;b.textContent='1 s';try{
+    if(st.fake)await post('/api/fake',{who:SRC[k],pose:rad(getF(k))});
+    const r=await post('/api/latch',{who:SRC[k]});setF(k,[r.pose[0],r.pose[1],r.pose[2]*180/Math.PI]);changed();
+    if(r.spread_cm>1.5||r.spread_deg>3)alert(`Cap moved during the latch: ${r.spread_cm.toFixed(1)} cm, ${r.spread_deg.toFixed(1)} deg`)}catch(e){alert(e.message)}b.disabled=false;b.textContent='Cap'});
+
+$('hslide').oninput=()=>$('hdeg').value=$('hslide').value;
+$('hdeg').oninput=()=>{const v=parseFloat($('hdeg').value);if(isFinite(v))$('hslide').value=Math.round(Math.atan2(Math.sin(v*Math.PI/180),Math.cos(v*Math.PI/180))*180/Math.PI)};
+$('hset').onclick=async()=>{const who=$('hwho').value,deg=parseFloat($('hdeg').value);if(!isFinite(deg))return alert('heading: a number in deg');
+  $('hset').disabled=true;try{const r=await post('/api/heading',{who,deg});$('hset').textContent=`${r.fix_deg>0?'+':''}${r.fix_deg.toFixed(0)}`;setTimeout(()=>$('hset').textContent='Set',2000)}catch(e){alert(e.message)}$('hset').disabled=false};
+
+// ------------------ preview + run
+let previewedJson=null;
+$('prev').onclick=async()=>{if(prevStatus=='running'){await post('/api/preview/cancel',{});return}res=null;try{const sc=scene();await post('/api/preview',{...sc,max_s:+$('limit').value});previewedJson=JSON.stringify(sc)}catch(e){alert(e.message)}};
+let wasRunning=false;
+async function loadResult(){res=await (await fetch('/api/preview')).json();const s=$('seek');s.max=res.frames.length-1;s.value=0;frameIdx=0;setView('preview');playing=true;
+  const ok=res.outcome=='success';$('outcome').innerHTML=`<b class="${ok?'ok':'bad'}">${res.outcome}</b> ${res.detail||''}<br>push ${res.push_s} s, end error ${res.err_m} m, ${res.err_deg} deg<br>end a (${res.end.a[0].toFixed(2)}, ${res.end.a[1].toFixed(2)}), b (${res.end.b[0].toFixed(2)}, ${res.end.b[1].toFixed(2)})`+(res.warnings.length?`<br><span class="warn">${res.warnings.join(' | ')}</span>`:'');refreshForm()}
+function showFrame(){if(!res||!res.frames)return;const fr=res.frames[frameIdx];applyFrame(fr.b);const q=fr.box;boxMesh.position.set(q[0],q[1],q[2]);boxMesh.quaternion.set(q[4],q[5],q[6],q[3]);const h=scene().half;boxMesh.scale.set(h[0]*2,h[1]*2,h[2]*2);$('seek').value=frameIdx;
+  const pol=fr.t>=res.t_policy;$('time').textContent=`${fr.t.toFixed(1)} s ${pol?'policy':'ramp/stand'}`}
+$('seek').oninput=e=>{playing=false;$('play').textContent='Play';frameIdx=+e.target.value;setView('preview');showFrame();draw2()};
+$('play').onclick=()=>{if(!res)return;setView('preview');playing=!playing;if(playing&&frameIdx>=res.frames.length-1)frameIdx=0;$('play').textContent=playing?'Pause':'Play'};
+let lastTick=performance.now();setInterval(()=>{const now=performance.now(),dt=(now-lastTick)/1000;lastTick=now;if(playing&&res&&res.frames&&view=='preview'){const fps=(res.frames.length-1)/Math.max(res.frames.at(-1).t,.01);playClock=(playClock??frameIdx)+dt*fps;frameIdx=Math.min(Math.floor(playClock),res.frames.length-1);showFrame();draw2();if(frameIdx>=res.frames.length-1){playing=false;playClock=null;$('play').textContent='Play'}else $('play').textContent='Pause'}else playClock=null},40);let playClock=null;
+$('exec').onclick=async()=>{if(!confirm(st.send?'Start both robots now?':'Dry run: nothing is sent. Run?'))return;try{await post('/api/execute',{scene:scene()});$('arm').checked=false;setView('live')}catch(e){alert(e.message)}};
+$('fit').onclick=()=>{const pts=[[0,0]];if(st)for(const k in st.live)if(st.live[k])pts.push(st.live[k].pose);const sc=scene();pts.push(sc.goal,sc.box);
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),lo=[Math.min(...xs)-.8,Math.min(...ys)-.8],hi=[Math.max(...xs)+.8,Math.max(...ys)+.8];
+  view2.cx=(lo[0]+hi[0])/2;view2.cy=(lo[1]+hi[1])/2;view2.s=Math.max(20,Math.min(300,Math.min(C.width/(hi[0]-lo[0]),C.height/(hi[1]-lo[1]))));draw2()};
+$('reset').onclick=async()=>{try{await post('/api/reset');res=null;previewedJson=null;$('outcome').innerHTML='';$('run').innerHTML='';const s=$('seek');s.max=0;s.value=0;setView('form')}catch(e){alert(e.message)}};
+function apprTarget(){if(!st||!st.live.box||!st.live.a)return null;if(st.approach)return st.approach.target;const b=st.live.box.pose,a=st.live.a.pose,g=getF('goal'),push=$('apprside').value=='push';
+  let d=push?[g[0]-b[0],g[1]-b[1]]:[b[0]-a[0],b[1]-a[1]];const n=Math.hypot(...d);if(n<.1)return null;d=[d[0]/n,d[1]/n];const r=+$('standoff').value;return[b[0]-d[0]*r,b[1]-d[1]*r,Math.atan2(d[1],d[0])]}
+$('appr').onclick=async()=>{if(!$('arm').checked)return alert('tick "spotters ready" first');if(!confirm(st.send?'Robot a walks to the box now?':'Dry run: nothing is sent. Run?'))return;
+  try{const sc=scene();await post('/api/approach',{goal:[sc.goal[0],sc.goal[1]],standoff:+$('standoff').value,side:$('apprside').value,half:sc.half});$('arm').checked=false;setView('live')}catch(e){alert(e.message)}};
+['standoff','apprside'].forEach(k=>$(k).addEventListener('input',draw2));
+$('scripts').onclick=()=>post('/api/start_scripts',{}).catch(e=>alert(e.message));const stop=()=>post('/api/stop').catch(()=>{});$('stop').onclick=stop;addEventListener('keydown',e=>{if(e.key=='Escape')stop()});
+let prevStatus='none';
+async function poll(){let s;try{s=await (await fetch('/api/state')).json()}catch{$('mode').textContent='SERVER GONE';$('mode').style.background='#a11d1d';return}
+  st=s;const pol=$('policy');if(s.solo&&!$('r_b').dataset.solo){$('r_b').dataset.solo=1;$('r_b').innerHTML=`<b style="color:${COLORS.b}">ghost b</b><span class="dim" style="grid-column:span 4">no robot: the partner the policy is shown, ${-s.ghost[1]} m right of robot a</span>`;$('hwho').querySelector('option[value=b]').remove();refreshForm()}
+  if(!pol.options.length){for(const k in s.policies)pol.add(new Option(k,k));$('warn').textContent=localWarn().join(' | ')}
+  $('mode').textContent=s.send?'LIVE: Execute commands the robots':s.fake?'FAKE caps, dry: sends nothing':'DRY: sends nothing';$('mode').style.background=s.send?'#7a2020':'#28402f';
+  $('fakebox').style.display=s.fake?'':'none';
+  $('caps').innerHTML=(s.solo?['a','box']:['a','b','box']).map(k=>{const l=s.live[k];if(!l)return`<div class="bad">${k}: never seen</div>`;const fresh=l.age<.25;return`<div class="${fresh?'':'bad'}"><b style="color:${COLORS[k]}">${k}</b> (${l.pose[0].toFixed(2)}, ${l.pose[1].toFixed(2)}) ${(l.pose[2]*180/Math.PI).toFixed(0)} deg, ${(l.age*1e3).toFixed(0)} ms ${l.oriented?'':'<span class="warn">no yaw ref</span>'}${Math.abs(l.fix_deg)>.05?` <span class="dim">(set ${l.fix_deg>0?'+':''}${l.fix_deg.toFixed(1)})</span>`:''}</div>`}).join('');
+  $('ping').innerHTML='ping '+s.robots.map(h=>`<span class="${s.ping[h]?'ok':'bad'}">${h}</span>`).join(' ');
+  sendForm();const blocks=s.blockers;$('block').innerHTML=blocks.map(b=>`<div>${b}</div>`).join('')+(s.notes||[]).map(n=>`<div class="warn">note: ${n}</div>`).join('');$('exec').disabled=blocks.length>0||!$('arm').checked;
+  $('robots').innerHTML=s.robot_status.map((r,i)=>`<div class="${r.age<1.5?'ok':'bad'}">robot ${'ab'[i]} ${s.robots[i]}: ${r.age<1.5?`${r.state||'?'} ${r.why||''}, gap ${r.gap_ms} ms`:'not answering'}</div>`).join('');
+  $('padinfo').textContent=s.pad?`DS4 ${s.pad.connected?'connected':'not connected'}, light ${s.pad.light}${s.pad.light_ok?'':' (bar not writable)'}${s.manual?`, MANUAL, robot ${s.sel}`:`, selected ${s.sel}`}. ${s.pad.msg}`:'';
+  const p=s.preview;$('prev').textContent=p.status=='running'?`Simulating ${(100*p.progress).toFixed(0)}% of limit (click to cancel)`:'Preview in sim';
+  if(p.status=='done'&&prevStatus!='done')await loadResult();if(p.status=='error'&&prevStatus!='error')$('outcome').innerHTML=`<span class="bad">${p.message}</span>`;prevStatus=p.status;
+  const r=s.run;$('run').innerHTML=r.phase=='idle'?'':`<b>${r.phase}</b> ${r.message||''}`+(r.dist_m!=null?`<br>t ${r.t.toFixed(1)} s, target ${r.dist_m.toFixed(2)} m, ${r.err_deg.toFixed(0)} deg, cmd ${r.cmd[0]}`:'')+(r.err_m!=null?`<br>t ${r.t.toFixed(1)} s, box ${r.err_m.toFixed(2)} m, ${r.err_deg.toFixed(0)} deg<br>cmd a ${r.cmd[0]} b ${r.cmd[1]}`:'');
+  {const L=s.live,deg=r=>(r*180/Math.PI).toFixed(1).padStart(6),xy=p=>`${p[0].toFixed(3).padStart(7)} ${p[1].toFixed(3).padStart(7)}`,sc=scene(),lines=['live (m, deg)      x       y    yaw'];
+    for(const[k,n]of[['box','box'],['a','robot a'],...(s.solo?[]:[['b','robot b']])]){const l=L[k];lines.push(`${n.padEnd(9)}${l?`${xy(l.pose)} ${deg(l.pose[2])} ${l.age<.25?'':'STALE'}`:'  not seen'}`)}
+    if(L.box){const g=sc.goal,d=Math.hypot(L.box.pose[0]-g[0],L.box.pose[1]-g[1]);lines.push(`box to goal ${d.toFixed(2)} m`);
+      if(L.a)lines.push(`robot a to box ${Math.hypot(L.a.pose[0]-L.box.pose[0],L.a.pose[1]-L.box.pose[1]).toFixed(2)} m`)}
+    $('livebox').textContent=lines.join('\n')}
+  if($('track').checked&&!drag){let moved=false;for(const k of s.solo?['a','box']:['a','b','box']){const l=s.live[k];if(!l||l.age>=.25)continue;const v=[l.pose[0],l.pose[1],l.pose[2]*180/Math.PI],o=getF(k);
+      if(Math.hypot(v[0]-o[0],v[1]-o[1])>.005||Math.abs(v[2]-o[2])>.5){setF(k,v);moved=true}}if(moved){save();if(view=='form')refreshForm();$('warn').textContent=localWarn().join(' | ')}}
+  if(view=='live'){if(s.frame)applyFrame(s.frame);else liveKin(s);if(s.live.box)liveBox(s.live.box,scene().half)}
+  draw2()}
+// live box in 3D: full cap orientation (tilt + yaw); the cap point is the top-face centre, so the centre is half a height down the box z axis
+function liveBox(l,half){const q=l.pose3;if(!q){setBox(boxMesh,l.pose,half);return}boxMesh.scale.set(half[0]*2,half[1]*2,half[2]*2);boxMesh.quaternion.set(q[4],q[5],q[6],q[3]);
+  const z=new THREE.Vector3(0,0,1).applyQuaternion(boxMesh.quaternion);boxMesh.position.set(q[0]-z.x*half[2],q[1]-z.y*half[2],q[2]-z.z*half[2])}
+$('track').addEventListener('change',()=>{if($('track').checked)setView('live')});
+// live view with no run: stand the robots at their live cap poses (home pose), at most 5 Hz
+let kinBusy=false,kinAt=0;
+async function liveKin(s){const now=performance.now();if(kinBusy||now-kinAt<200||!s.live.a)return;kinBusy=true;kinAt=now;
+  try{const a=s.live.a.pose,b=s.solo?ghostOf(a):(s.live.b?s.live.b.pose:rad(getF('b')));const fr=(await post('/api/kinematics',{a,b})).frame;if(view=='live'&&!st.frame)applyFrame(fr)}catch{}kinBusy=false}
+function anim(){requestAnimationFrame(anim);orbit.update();const e=$('d3');if(R.domElement.width!=e.clientWidth)resize3();R.render(S3,cam)}
+await loadModel();resize3();anim();setInterval(poll,100);await poll();refreshForm();
+</script></body></html>

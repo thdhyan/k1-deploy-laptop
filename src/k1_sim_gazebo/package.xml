@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>k1_sim_gazebo</name>
+  <version>0.1.0</version>
+  <description>Gazebo Harmonic simulation for Booster K1</description>
+  <maintainer email="th.dhyan.us@gmail.com">thakk100</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>ros_gz_sim</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros2_control</depend>
+  <depend>gz_ros2_control</depend>
+  <depend>k1_description</depend>
+  <depend>k1_interfaces</depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
