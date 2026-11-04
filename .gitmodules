@@ -1,0 +1,3 @@
+[submodule "sdk/booster_robotics_sdk"]
+	path = sdk/booster_robotics_sdk
+	url = https://github.com/BoosterRobotics/booster_robotics_sdk.git
