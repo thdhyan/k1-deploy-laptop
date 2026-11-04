@@ -31,7 +31,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([FindPackageShare('k1_description'), 'launch', 'view_robot.launch.py'])
             ]),
-            launch_arguments={'robot_ns': robot_ns}.items(),
+            launch_arguments={'robot_ns': robot_ns, 'gui': 'false'}.items(),
         ),
 
         # 2. Gazebo sim
