@@ -10,7 +10,6 @@ import math
 import sys
 import threading
 import time
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -42,8 +41,9 @@ from k1_runtime.gamepad_core import (  # noqa: F401
 
 def run_sim(args):
   import mujoco
+  import k1_description
 
-  xml = Path(__file__).resolve().parents[2] / "src/k1_description/assets/robots/K1/K1_22dof_mjlab.xml"
+  xml = k1_description.robot_file(k1_description.MJCF_MJLAB)
   spec = mujoco.MjSpec.from_file(str(xml))
   spec.option.timestep = 0.005
   if getattr(args, "terrain", "flat") == "rough":

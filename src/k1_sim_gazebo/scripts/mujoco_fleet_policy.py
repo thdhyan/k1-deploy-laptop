@@ -21,7 +21,8 @@ import mujoco
 from mujoco import Renderer
 import cv2
 
-from k1_common.paths import model
+import k1_description
+from k1_common.paths import model as model_path
 
 # ── Joint config ─────────────────────────────────────────────────────
 JOINT_ORDER = [
@@ -165,13 +166,11 @@ def main():
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--video", default="docs/videos/fleet_policy_walk.mp4")
     parser.add_argument("--outdir", default="docs/images")
-    parser.add_argument("--policy", default=str(model("k1_velocity_policy.pt")))
+    parser.add_argument("--policy", default=str(model_path("k1_velocity_policy.pt")))
     parser.add_argument("--cmd-vx", type=float, default=0.5, help="forward velocity cmd (m/s)")
     args = parser.parse_args()
 
-    urdf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "../../k1_description/assets/robots/K1/K1_22dof.urdf")
-    urdf = os.path.normpath(urdf)
+    urdf = str(k1_description.robot_file(k1_description.URDF))
 
     # Formation: 2 teams of 3, facing each other
     FORMATION = [

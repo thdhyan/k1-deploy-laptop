@@ -22,6 +22,7 @@ import time
 os.environ.setdefault("MUJOCO_GL", "egl")
 
 import numpy as np  # noqa: E402
+import k1_description  # noqa: E402
 
 FIELD_L, FIELD_W = 8.0, 5.0   # demo-scale pitch (m)
 GOAL_W, GOAL_H = 2.0, 0.9
@@ -123,9 +124,7 @@ def build_field_spec():
                   rgba=[1.0, 0.85, 0.1, 1])
 
     # six K1 humanoids
-    urdf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "../../k1_description/assets/robots/K1/K1_22dof.urdf")
-    urdf = os.path.normpath(urdf)
+    urdf = str(k1_description.robot_file(k1_description.URDF))
     for ns, x, y, yaw in FORMATION:
         robot_spec = mujoco.MjSpec.from_file(urdf)
         rad = np.deg2rad(yaw)

@@ -17,6 +17,7 @@ import time
 os.environ.setdefault("MUJOCO_GL", "egl")
 
 import numpy as np
+import k1_description
 import mujoco
 from mujoco import Renderer
 import cv2
@@ -181,9 +182,7 @@ def main():
     parser.add_argument("--outdir", default="docs/images")
     args = parser.parse_args()
 
-    urdf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "../../k1_description/assets/robots/K1/K1_22dof.urdf")
-    urdf = os.path.normpath(urdf)
+    urdf = str(k1_description.robot_file(k1_description.URDF))
     assert os.path.exists(urdf), f"URDF not found: {urdf}"
 
     # 6 robots: 2 teams of 3

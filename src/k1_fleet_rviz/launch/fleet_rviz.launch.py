@@ -13,6 +13,8 @@ Usage:
     ros2 launch k1_fleet_rviz fleet_rviz.launch.py robots:="k1_0,k1_1,k1_2"
 """
 import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, LogInfo
 from launch.substitutions import LaunchConfiguration
@@ -33,18 +35,10 @@ ROBOTS = {
     'k1_5': {'alias': 'B3', 'ip': '10.86.36.248'},
 }
 
-URDF_PATH = os.path.expanduser(
-    '~/Projects/booster_ws/src/k1_description/assets/K1_22dof.urdf'
-)
-
-RVIZ_CONFIG = os.path.expanduser(
-    '~/Projects/booster_ws/install/k1_fleet_rviz/share/k1_fleet_rviz/config/fleet_rviz.rviz'
-)
-# Fallback to source if install not yet available
-if not os.path.exists(RVIZ_CONFIG):
-    RVIZ_CONFIG = os.path.expanduser(
-        '~/Projects/booster_ws/src/k1_fleet_rviz/config/fleet_rviz.rviz'
-    )
+URDF_PATH = os.path.join(get_package_share_directory('k1_description'),
+                         'assets', 'robots', 'K1', 'K1_22dof.urdf')
+RVIZ_CONFIG = os.path.join(get_package_share_directory('k1_fleet_rviz'),
+                           'config', 'fleet_rviz.rviz')
 
 
 def _read_urdf():

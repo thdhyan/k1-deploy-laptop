@@ -27,6 +27,7 @@ parser.add_argument("--baseline", type=float, default=0.120,
 args, _ = parser.parse_known_args()
 
 import numpy as np  # noqa: E402
+import k1_description  # noqa: E402
 
 RES_W, RES_H = 1280, 720          # HD720 mode
 HFOV_DEG = 101.0                  # ZED 2i 2.1mm @ HD720 (Stereolabs table)
@@ -85,9 +86,8 @@ def build_spec():
             type=mujoco.mjtGeom.mjGEOM_BOX,
             size=[0.25, 0.25, z], rgba=list(c), contype=0, conaffinity=0)
 
-    urdf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "../../k1_description/assets/robots/K1/K1_22dof.urdf")
-    spec.attach(mujoco.MjSpec.from_file(os.path.normpath(urdf)),
+    urdf = str(k1_description.robot_file(k1_description.URDF))
+    spec.attach(mujoco.MjSpec.from_file(urdf),
                 site=spec.worldbody.add_site(pos=[0, 0, 0], name="spawn_k1"),
                 prefix="k1_")
 
