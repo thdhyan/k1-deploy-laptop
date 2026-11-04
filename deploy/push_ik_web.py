@@ -33,13 +33,14 @@ from pathlib import Path
 import numpy as np
 
 import push_ik_sim as sim
+from k1_common.paths import models_dir
 from k1_runtime.ds4 import Pad
 from k1_runtime.gamepad_core import ARM_POSE, ARM_RATE, HAND_RATE, ArmJog
 from k1_runtime.push_ik_core import CMD_SCALE, SUCCESS_R, SUCCESS_YAW, PushIKController, box_errors
-from push_ik_phasespace import ARENA_R, DT, MOCAP_STOP_S, MOCAP_ZERO_S, SETTLE_S, Link, object_pose, quat_rot
+from k1_teleop.push_ik_phasespace import ARENA_R, DT, MOCAP_STOP_S, MOCAP_ZERO_S, SETTLE_S, Link, object_pose, quat_rot
 
 HERE = Path(__file__).resolve().parent
-MODELS = HERE.parents[1] / "models/mjlab_k1"
+MODELS = models_dir() / "mjlab_k1"
 BASE = MODELS / "walk_still_v2/model_8998.pt"
 #: name -> checkpoint, trained full box height range (m). Depth and width are the same for all.
 POLICIES = {"v10 (normal boxes)": (MODELS / "push_ik_v10/model_12496.pt", (0.30, 0.60)),

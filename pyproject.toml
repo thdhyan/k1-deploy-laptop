@@ -12,6 +12,7 @@ dependencies = [
   "pytest",
   "torch",
   "k1-common",
+  "k1-description",
   "k1-runtime",
   "k1-teleop",
   "k1-perception",
@@ -19,6 +20,7 @@ dependencies = [
 
 [tool.uv.sources]
 k1-common = { git = "https://github.com/thdhyan/k1-common" }
+k1-description = { git = "https://github.com/thdhyan/k1-description" }
 k1-runtime = { git = "https://github.com/thdhyan/k1-runtime" }
 k1-teleop = { git = "https://github.com/thdhyan/k1-teleop" }
 k1-perception = { git = "https://github.com/thdhyan/k1-perception" }

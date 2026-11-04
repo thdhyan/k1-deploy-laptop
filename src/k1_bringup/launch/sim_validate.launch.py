@@ -9,14 +9,14 @@ Single entry point to validate a trained policy across all three sim backends:
 
 Usage:
   # Gazebo (default)
-  ros2 launch k1_bringup sim_validate.launch.py backend:=gazebo policy:=models/k1_velocity_policy.pt
+  ros2 launch k1_bringup sim_validate.launch.py backend:=gazebo policy:=k1_velocity_policy.pt
 
   # Isaac Sim (requires Isaac Lab venv)
-  ros2 launch k1_bringup sim_validate.launch.py backend:=isaac policy:=models/k1_velocity_policy.pt usd_path:=/path/to/k1.usd
+  ros2 launch k1_bringup sim_validate.launch.py backend:=isaac policy:=k1_velocity_policy.pt usd_path:=/path/to/k1.usd
 
   # MuJoCo (standalone script, no ROS launch needed)
   python3 src/k1_sim_gazebo/scripts/mujoco_fleet_node.py --n_robots 1 &
-  ros2 run k1_locomotion locomotion_node --ros-args -p robot_ns:=k1_0 -p policy_path:=models/k1_velocity_policy.pt
+  ros2 run k1_locomotion locomotion_node --ros-args -p robot_ns:=k1_0 -p policy_path:=k1_velocity_policy.pt
 
   # Multi-robot fleet validation (Gazebo)
   ros2 launch k1_bringup sim_validate.launch.py backend:=gazebo n_robots:=3
@@ -244,7 +244,7 @@ def generate_launch_description():
             choices=['gazebo', 'isaac', 'mujoco']),
         DeclareLaunchArgument('robot_ns', default_value='k1_0',
             description='Robot namespace (single robot mode)'),
-        DeclareLaunchArgument('policy_path', default_value='models/k1_velocity_policy.pt',
+        DeclareLaunchArgument('policy_path', default_value='k1_velocity_policy.pt',
             description='Path to TorchScript policy (relative to workspace root or absolute)'),
         DeclareLaunchArgument('n_robots', default_value='1',
             description='Number of robots for fleet validation (1-6)'),

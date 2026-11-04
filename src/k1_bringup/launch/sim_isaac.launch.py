@@ -24,7 +24,7 @@ def generate_launch_description():
         DeclareLaunchArgument('robot_ns', default_value='k1_0',
             description='Robot namespace — change for multi-robot fleet'),
         DeclareLaunchArgument('policy_path',
-            default_value='models/k1_velocity_policy.pt',
+            default_value='k1_velocity_policy.pt',
             description='Path to TorchScript policy'),
         DeclareLaunchArgument('usd_path', default_value='',
             description='Path to K1 USD file (from booster_assets)'),

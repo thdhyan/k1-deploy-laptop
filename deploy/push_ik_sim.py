@@ -7,15 +7,14 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from pathlib import Path
-
+import k1_description
 import mujoco
 import numpy as np
 
 from k1_runtime import gamepad_core as D
 from k1_runtime.push_ik_core import SUCCESS_R, SUCCESS_YAW, PushIKController, box_errors
 
-XML = Path(__file__).resolve().parents[2] / "src/k1_description/assets/robots/K1/K1_22dof_mjlab.xml"
+XML = k1_description.robot_file(k1_description.MJCF_MJLAB)
 PHYS_DT, DECIM = 0.005, 4
 DT = PHYS_DT * DECIM
 STAND_S = 2.0        # with the 2 s ramp = push_ik_web.SETTLE_S before the policy moves

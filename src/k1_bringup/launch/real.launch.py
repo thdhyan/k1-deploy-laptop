@@ -41,7 +41,7 @@ def generate_launch_description():
             description='Robot namespace (k1_0..k1_5 for fleet)'),
         DeclareLaunchArgument('sdk_ip', default_value='192.168.1.100',
             description='Robot SDK IP address (on WiFi)'),
-        DeclareLaunchArgument('policy_path', default_value='models/k1_velocity_policy.pt',
+        DeclareLaunchArgument('policy_path', default_value='k1_velocity_policy.pt',
             description='Path to TorchScript locomotion policy'),
         DeclareLaunchArgument('use_wbc', default_value='false',
             description='Enable whole-body controller (k1_wbc)'),

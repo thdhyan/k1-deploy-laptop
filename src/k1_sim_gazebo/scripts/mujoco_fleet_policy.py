@@ -21,6 +21,8 @@ import mujoco
 from mujoco import Renderer
 import cv2
 
+from k1_common.paths import model
+
 # ── Joint config ─────────────────────────────────────────────────────
 JOINT_ORDER = [
     "AAHead_yaw", "Head_pitch",
@@ -163,7 +165,7 @@ def main():
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--video", default="docs/videos/fleet_policy_walk.mp4")
     parser.add_argument("--outdir", default="docs/images")
-    parser.add_argument("--policy", default="models/k1_velocity_policy.pt")
+    parser.add_argument("--policy", default=str(model("k1_velocity_policy.pt")))
     parser.add_argument("--cmd-vx", type=float, default=0.5, help="forward velocity cmd (m/s)")
     args = parser.parse_args()
 

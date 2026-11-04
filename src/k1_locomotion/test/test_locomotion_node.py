@@ -23,10 +23,9 @@ import pytest
 
 torch = pytest.importorskip("torch", reason="TorchScript policy needs torch")
 
-WS_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
-)
-POLICY = os.path.join(WS_ROOT, "models", "k1_velocity_policy.pt")
+from k1_common.paths import model  # noqa: E402
+
+POLICY = str(model("k1_velocity_policy.pt"))
 
 from sensor_msgs.msg import JointState  # noqa: E402
 from geometry_msgs.msg import Twist  # noqa: E402

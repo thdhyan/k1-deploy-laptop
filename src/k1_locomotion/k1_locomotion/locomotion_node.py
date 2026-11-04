@@ -44,7 +44,9 @@ workspace convention.
 
 Params:
   robot_ns:       'k1_0'
-  policy_path:    TorchScript policy ('' = idle plumbing mode, no inference)
+  policy_path:    TorchScript policy ('' = idle plumbing mode, no inference).
+                  A relative path not found from the cwd is looked up under
+                  $K1_MODELS_DIR (k1_common.paths, default ~/k1_models).
   control_freq:   50.0 Hz (training decimation 4 x 200 Hz physics)
   action_scale:   0.25 (JointPositionActionCfg.scale, use_default_offset=True)
   command_type:   'k1_interfaces/JointCommand' | 'sensor_msgs/JointState'
@@ -70,6 +72,7 @@ path (both are Python 3.12):
       -m k1_locomotion.locomotion_node --ros-args -p robot_ns:=k1_0
 """
 import math
+import os
 import threading
 
 import numpy as np
@@ -79,6 +82,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 
+from k1_common.paths import model
 from k1_interfaces.msg import JointCommand, PolicyObs
 
 # 12 leg joints in EXACT policy order (= K1_LEG_JOINTS in velocity_env_cfg.py)
@@ -121,7 +125,9 @@ class LocomotionNode(Node):
         super().__init__('locomotion_node')
         self._ns = self.declare_parameter('robot_ns', 'k1_0').value
         policy_path = self.declare_parameter('policy_path',
-                                             'models/k1_velocity_policy.pt').value
+                                             'k1_velocity_policy.pt').value
+        if policy_path and not os.path.isabs(policy_path) and not os.path.exists(policy_path):
+            policy_path = str(model(policy_path))
         freq = float(self.declare_parameter('control_freq', 50.0).value)
         self._action_scale = float(self.declare_parameter('action_scale', 0.25).value)
         command_type = self.declare_parameter(

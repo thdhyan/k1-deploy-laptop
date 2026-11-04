@@ -13,7 +13,7 @@ def generate_launch_description():
     )
     policy_path_arg = DeclareLaunchArgument(
         'policy_path',
-        default_value='models/k1_velocity_policy.pt',
+        default_value='k1_velocity_policy.pt',
         description='Path to TorchScript policy file (absolute, or relative '
                     'to the workspace root — resolved by the node)'
     )
